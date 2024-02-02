@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Demo</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;700&display=swap">
+    <link rel="stylesheet" href="style.css" type="text/css">
+</head>
+
+<body>
+    <div class="game-container"></div>
+    <!-- <div class="player-info">
+        <label for="player-name">Your name</label>
+        <input id="player-name" maxlength="10" type="text">
+    </div>
+    <div>
+        <button id="player-color">Change Color</button>
+    </div> -->
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        // NOTE - INCLUDE YOUR FIREBASE CONFIG HERE FOR ANYTHING TO WORK:
+        const firebaseConfig = {
+            apiKey: "AIzaSyCGjULs3XFVINov2yXbejBa5S6eD4AuHks",
+            authDomain: "multiplayer-tutorial.firebaseapp.com",
+            databaseURL: "https://multiplayer-tutorial-default-rtdb.firebaseio.com",
+            projectId: "multiplayer-tutorial",
+            storageBucket: "multiplayer-tutorial.appspot.com",
+            messagingSenderId: "914816965822",
+            appId: "1:914816965822:web:8a550ce27c08cbd6db52ef"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    <!-- <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCGjULs3XFVINov2yXbejBa5S6eD4AuHks",
+            authDomain: "multiplayer-tutorial.firebaseapp.com",
+            databaseURL: "https://multiplayer-tutorial-default-rtdb.firebaseio.com",
+            projectId: "multiplayer-tutorial",
+            storageBucket: "multiplayer-tutorial.appspot.com",
+            messagingSenderId: "914816965822",
+            appId: "1:914816965822:web:8a550ce27c08cbd6db52ef"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+    </script> -->
+    <script src="KeyPressListener.js"></script>
+    <script src="/app.js"></script>
+</body>
+
+</html>
