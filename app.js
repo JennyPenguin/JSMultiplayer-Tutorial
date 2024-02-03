@@ -79,6 +79,36 @@ function isSolid(x, y) {
     )
 }
 
+function getRandomSafeSpot() {
+    //We don't look things up by key here, so just return an x/y
+    return randomFromArray([
+        { x: 1, y: 4 },
+        { x: 2, y: 4 },
+        { x: 1, y: 5 },
+        { x: 2, y: 6 },
+        { x: 2, y: 8 },
+        { x: 2, y: 9 },
+        { x: 4, y: 8 },
+        { x: 5, y: 5 },
+        { x: 5, y: 8 },
+        { x: 5, y: 10 },
+        { x: 5, y: 11 },
+        { x: 11, y: 7 },
+        { x: 12, y: 7 },
+        { x: 13, y: 7 },
+        { x: 13, y: 6 },
+        { x: 13, y: 8 },
+        { x: 7, y: 6 },
+        { x: 7, y: 7 },
+        { x: 7, y: 8 },
+        { x: 8, y: 8 },
+        { x: 10, y: 8 },
+        { x: 8, y: 8 },
+        { x: 11, y: 4 },
+    ]);
+}
+
+
 (function () {
 
     let playerId;
@@ -86,6 +116,11 @@ function isSolid(x, y) {
     // players is the local data of player
     let players = {};
     let playerElements = {};
+
+    const gameContainer = document.querySelector(".game-container");
+    const playerNameInput = document.querySelector("#player-name");
+    const playerColorButton = document.querySelector("#player-color");
+
 
     function handleArrowPress(xChange = 0, yChange = 0) {
         const newX = players[playerId].x + xChange;
@@ -113,8 +148,6 @@ function isSolid(x, y) {
 
         const allPlayersRef = firebase.database().ref('players');
         const allCoinsRef = firebase.database().ref('coins');
-
-        const gameContainer = document.querySelector(".game-container");
 
         // callback when value of players changes (when player join or leave)
         allPlayersRef.on("value", (snapshot) => {
@@ -170,34 +203,57 @@ function isSolid(x, y) {
             gameContainer.removeChild(playerElements[removeKey]);
             delete playerElements[removeKey];
         })
+
+        // updates player name with text input
+        playerNameInput.addEventListener("change", (e) => {
+            const newName = e.target.value || createName();
+            playerNameInput.value = newName;
+            // only update key passed in
+            playerRef.update({
+                name: newName
+            });
+        })
+
+        // update player color
+        playerColorButton.addEventListener("click", () => {
+            const mySkinIndex = playerColors.indexOf(players[playerId].color);
+            const nextColor = playerColors[mySkinIndex + 1] || playerColors[0];
+            playerRef.update({
+                color: nextColor
+            });
+        })
     }
 
-    const name = createName();
-
     firebase.auth().onAuthStateChanged((user) => {
-        console.log(user);
+        console.log(user)
         if (user) {
-            // you are logged in!
+            //You're logged in!
             playerId = user.uid;
             playerRef = firebase.database().ref(`players/${playerId}`);
+
+            const name = createName();
+            playerNameInput.value = name;
+
+            const { x, y } = getRandomSafeSpot();
+
 
             playerRef.set({
                 id: playerId,
                 name,
                 direction: "right",
                 color: randomFromArray(playerColors),
-                x: 3,
-                y: 10,
+                x,
+                y,
                 coins: 0,
             })
 
-            //Remove player from Firebase when they disconnect
+            //Remove me from Firebase when I diconnect
             playerRef.onDisconnect().remove();
 
-            //Begin the game
+            //Begin the game now that we are signed in
             initGame();
         } else {
-            // you are logged out.
+            //You're logged out.
         }
     })
 
