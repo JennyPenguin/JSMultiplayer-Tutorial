@@ -116,11 +116,38 @@ function getRandomSafeSpot() {
     // players is the local data of player
     let players = {};
     let playerElements = {};
+    let coins = {};
+    let coinElements = {};
 
     const gameContainer = document.querySelector(".game-container");
     const playerNameInput = document.querySelector("#player-name");
     const playerColorButton = document.querySelector("#player-color");
 
+    function placeCoin() {
+        const { x, y } = getRandomSafeSpot();
+        const coinRef = firebase.database().ref(`coins/${getKeyString(x, y)}`);
+        coinRef.set({
+            x,
+            y,
+        })
+
+        // every player will be randomly firing coins
+        const coinTimeouts = [2000, 3000, 4000, 5000];
+        setTimeout(() => {
+            placeCoin();
+        }, randomFromArray(coinTimeouts))
+    }
+
+    function attemptGrabCoin(x, y) {
+        const key = getKeyString(x, y);
+        if (coins[key]) {
+            // Remove this key from data, then update Player's coin count
+            firebase.database().ref(`coins/${key}`).remove();
+            playerRef.update({
+                coins: players[playerId].coins + 1,
+            })
+        }
+    }
 
     function handleArrowPress(xChange = 0, yChange = 0) {
         const newX = players[playerId].x + xChange;
@@ -136,6 +163,7 @@ function getRandomSafeSpot() {
                 players[playerId].direction = "left";
             }
             playerRef.set(players[playerId]);
+            attemptGrabCoin(newX, newY);
         }
     }
 
@@ -214,6 +242,39 @@ function getRandomSafeSpot() {
             });
         })
 
+
+        allCoinsRef.on("child_added", (snapshot) => {
+            const coin = snapshot.val();
+            const key = getKeyString(coin.x, coin.y);
+            coins[key] = true;
+
+            // Create the DOM Element
+            const coinElement = document.createElement("div");
+            coinElement.classList.add("Coin", "grid-cell");
+            coinElement.innerHTML = `
+                <div class="Coin_shadow grid-cell"></div>
+                <div class="Coin_sprite grid-cell"></div>
+            `;
+
+            // Position the Element
+            const left = 16 * coin.x + "px";
+            const top = 16 * coin.y - 4 + "px";
+            coinElement.style.transform = `translate3d(${left}, ${top}, 0)`;
+
+            // Keep a reference for removal later and add to DOM
+            coinElements[key] = coinElement;
+            gameContainer.appendChild(coinElement);
+        })
+
+        allCoinsRef.on("child_removed", (snapshot) => {
+            const { x, y } = snapshot.val();
+            const keyToRemove = getKeyString(x, y);
+            gameContainer.removeChild(coinElements[keyToRemove]);
+            delete coinElements[keyToRemove];
+            delete coins[keyToRemove];
+        })
+
+
         // update player color
         playerColorButton.addEventListener("click", () => {
             const mySkinIndex = playerColors.indexOf(players[playerId].color);
@@ -222,6 +283,9 @@ function getRandomSafeSpot() {
                 color: nextColor
             });
         })
+
+        // Place First Coin
+        placeCoin();
     }
 
     firebase.auth().onAuthStateChanged((user) => {
